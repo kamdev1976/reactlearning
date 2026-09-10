@@ -1,137 +1,29 @@
 {
-  "medicines": [
+  "medicines": [],
+  "invoices": [],
+  "monthlyLedgers": [
     {
-      "id": "1789050312722",
-      "name": "Acrobat 25 100",
-      "price": 877,
-      "stock": 10
-    },
-    {
-      "id": "101",
-      "name": "Paracetamol 500mg",
-      "price": 15,
-      "stock": 120
-    },
-    {
-      "id": "102",
-      "name": "Amoxicillin 250mg",
-      "price": 45,
-      "stock": 80
-    }
-  ],
-  "invoices": [
-    {
-      "id": "INV-233385",
-      "customer": "ffgf",
-      "phone": "3434343434",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "1789050312722",
-          "name": "Acrobat 25 100",
-          "price": 877,
-          "qty": 10
-        }
+      "id": "2026-09",
+      "monthKey": "Sep-26",
+      "carryForward": 1433,
+      "collections": [
+        { "id": 1, "member": "Kamdev Sahoo", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 2, "member": "Himanshu Gaur", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 3, "member": "Mahesh", "amountPaid": 1000, "receivedBy": "Sahoo" },
+        { "id": 4, "member": "Ankit Gupta", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 5, "member": "Kundan", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 6, "member": "Abhishek Sen", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 7, "member": "Mohanty", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 8, "member": "Ambuj", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 9, "member": "Anup", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 10, "member": "Amod Giri", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 11, "member": "Vivek", "amountPaid": 1500, "receivedBy": "Sahoo" },
+        { "id": 12, "member": "Madan", "amountPaid": 1500, "receivedBy": "" }
       ],
-      "subtotal": 8770,
-      "gst": 1052,
-      "total": 9822
-    },
-    {
-      "id": "INV-683053",
-      "customer": "gff",
-      "phone": "fgf",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "1789050312722",
-          "name": "Acrobat 25 100",
-          "price": 877,
-          "qty": 10
-        }
-      ],
-      "subtotal": 8770,
-      "gst": 1052,
-      "total": 9822
-    },
-    {
-      "id": "INV-659402",
-      "customer": "fgfg",
-      "phone": "fgfgf",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "1789050312722",
-          "name": "Acrobat 25 100",
-          "price": 877,
-          "qty": 10
-        }
-      ],
-      "subtotal": 8770,
-      "gst": 1052,
-      "total": 9822
-    },
-    {
-      "id": "INV-635274",
-      "customer": "rass",
-      "phone": "323232",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "1789050312722",
-          "name": "Acrobat 25 100",
-          "price": 877,
-          "qty": 1
-        }
-      ],
-      "subtotal": 877,
-      "gst": 105,
-      "total": 982
-    },
-    {
-      "id": "INV-340390",
-      "customerName": "rakesh gupta",
-      "customerPhone": "8750899292",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "1789050312722",
-          "name": "Acrobat 25 100",
-          "price": 877,
-          "stock": 10,
-          "qty": 10
-        }
-      ],
-      "subTotal": 8770,
-      "tax": 1052,
-      "grandTotal": 9822,
-      "servedBy": "kamadeva"
-    },
-    {
-      "id": "INV-273440",
-      "customerName": "kamadeva ",
-      "customerPhone": "8750790502",
-      "paymentMode": "Cash",
-      "items": [
-        {
-          "id": "101",
-          "name": "Paracetamol 500mg",
-          "price": 15,
-          "stock": 120,
-          "qty": 1
-        },
-        {
-          "id": "102",
-          "name": "Amoxicillin 250mg",
-          "price": 45,
-          "stock": 80,
-          "qty": 1
-        }
-      ],
-      "subTotal": 60,
-      "tax": 7,
-      "grandTotal": 67,
-      "servedBy": "kamadeva"
+      "expenses": [
+        { "id": 1, "description": "1 Court charge", "amount": 9000 },
+        { "id": 2, "description": "2nd court charge", "amount": 8000 }
+      ]
     }
   ]
 }
