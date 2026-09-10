@@ -1,11 +1,12 @@
-// employee-portal/server.cjs
+// server.cjs
 const fs = require('fs');
 const http = require('http');
 
-// Use Render's provided PORT or default to 8000 for local dev
+// Use Render's assigned environment PORT or default to 8000 for local development
 const PORT = process.env.PORT || 8000;
 const DB_FILE = './db.json';
 
+// Helper function to read persistent data
 const getDbData = () => {
   try {
     return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -15,10 +16,12 @@ const getDbData = () => {
 };
 
 const server = http.createServer((req, res) => {
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // Handle Preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
@@ -27,13 +30,26 @@ const server = http.createServer((req, res) => {
 
   const db = getDbData();
 
-  if (req.url === '/medicines' && req.method === 'GET') {
+  // GET / (Health Check Endpoint)
+  if (req.url === '/' && req.method === 'GET') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'Pharmacy Backend API is running' }));
+  }
+
+  // GET /medicines
+  else if (req.url === '/medicines' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(db.medicines || []));
-  } else if (req.url === '/invoices' && req.method === 'GET') {
+  } 
+  
+  // GET /invoices
+  else if (req.url === '/invoices' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(db.invoices || []));
-  } else if (req.url === '/medicines' && req.method === 'POST') {
+  } 
+  
+  // POST /medicines (Add New Medicine)
+  else if (req.url === '/medicines' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -43,7 +59,10 @@ const server = http.createServer((req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(newMed));
     });
-  } else if (req.url === '/invoices' && req.method === 'POST') {
+  } 
+
+  // POST /invoices (Create Invoice)
+  else if (req.url === '/invoices' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -58,7 +77,10 @@ const server = http.createServer((req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(newInv));
     });
-  } else if (req.url.startsWith('/medicines/') && req.method === 'PATCH') {
+  } 
+
+  // PATCH /medicines/:id (Update Stock)
+  else if (req.url.startsWith('/medicines/') && req.method === 'PATCH') {
     const medId = req.url.split('/')[2];
     let body = '';
     req.on('data', chunk => body += chunk);
@@ -71,13 +93,16 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true }));
     });
-  } else {
-    res.writeHead(404);
+  } 
+  
+  // 404 Fallback for Unknown Routes
+  else {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Endpoint not found' }));
   }
 });
 
-// Bind to 0.0.0.0 so external services like Render can detect the port
+// Bind to 0.0.0.0 for Cloud Deployment (Render/Railway/Vercel)
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Mock Backend Server listening on port ${PORT}`);
 });
