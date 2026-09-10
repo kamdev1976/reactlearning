@@ -7,7 +7,9 @@ export default function Header() {
 
   return (
     <header className="header">
-      <h2>POC Dashboard</h2>
+      <h2 style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
+        POC Dashboard
+      </h2>
       {user && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
@@ -16,6 +18,15 @@ export default function Header() {
           >
             + New Medicine Bill
           </button>
+
+          {/* Added Club Ledger Button */}
+          <button 
+            onClick={() => navigate('/club-ledger')} 
+            style={{ background: '#0284c7', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            Club Ledger
+          </button>
+
           <span>Welcome, {user.username} ({user.role})</span>
           <button className="logout-btn" onClick={logout}>Logout</button>
         </div>
