@@ -2,7 +2,8 @@
 const fs = require('fs');
 const http = require('http');
 
-const PORT = 8000;
+// Use Render's provided PORT or default to 8000 for local dev
+const PORT = process.env.PORT || 8000;
 const DB_FILE = './db.json';
 
 const getDbData = () => {
@@ -26,17 +27,13 @@ const server = http.createServer((req, res) => {
 
   const db = getDbData();
 
-  // GET Requests
   if (req.url === '/medicines' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(db.medicines || []));
   } else if (req.url === '/invoices' && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(db.invoices || []));
-  } 
-  
-  // POST /medicines
-  else if (req.url === '/medicines' && req.method === 'POST') {
+  } else if (req.url === '/medicines' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -46,10 +43,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(newMed));
     });
-  } 
-
-  // POST /invoices
-  else if (req.url === '/invoices' && req.method === 'POST') {
+  } else if (req.url === '/invoices' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => body += chunk);
     req.on('end', () => {
@@ -64,10 +58,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(201, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(newInv));
     });
-  } 
-
-  // PATCH /medicines/:id (Update Stock)
-  else if (req.url.startsWith('/medicines/') && req.method === 'PATCH') {
+  } else if (req.url.startsWith('/medicines/') && req.method === 'PATCH') {
     const medId = req.url.split('/')[2];
     let body = '';
     req.on('data', chunk => body += chunk);
@@ -80,14 +71,13 @@ const server = http.createServer((req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: true }));
     });
-  }
-  
-  else {
+  } else {
     res.writeHead(404);
     res.end(JSON.stringify({ error: 'Endpoint not found' }));
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Mock Backend Server listening on http://127.0.0.1:${PORT}`);
+// Bind to 0.0.0.0 so external services like Render can detect the port
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Mock Backend Server listening on port ${PORT}`);
 });
