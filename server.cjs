@@ -94,7 +94,42 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify({ success: true }));
     });
   } 
-  
+
+  // GET /ledger-months (List all available months)
+  else if (req.url === '/ledger-months' && req.method === 'GET') {
+    const months = (db.monthlyLedgers || []).map(l => l.monthKey);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(months));
+  }
+
+  // GET /ledger/:monthKey
+  else if (req.url.startsWith('/ledger/') && req.method === 'GET') {
+    const monthKey = req.url.split('/')[2];
+    const ledger = (db.monthlyLedgers || []).find(l => l.monthKey === monthKey);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(ledger || { monthKey, carryForward: 0, collections: [], expenses: [] }));
+  }
+
+  // POST /ledger (Save/Update Monthly Ledger)
+  else if (req.url === '/ledger' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+      const payload = JSON.parse(body);
+      if (!db.monthlyLedgers) db.monthlyLedgers = [];
+      
+      const idx = db.monthlyLedgers.findIndex(l => l.monthKey === payload.monthKey);
+      if (idx >= 0) {
+        db.monthlyLedgers[idx] = payload;
+      } else {
+        db.monthlyLedgers.push(payload);
+      }
+
+      fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(payload));
+    });
+  }
   // 404 Fallback for Unknown Routes
   else {
     res.writeHead(404, { 'Content-Type': 'application/json' });
