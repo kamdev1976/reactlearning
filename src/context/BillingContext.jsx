@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const BillingContext = createContext(null);
-const API_URL = 'http://127.0.0.1:8000';
+//const API_URL = 'http://127.0.0.1:8000';
+const API_URL = 'https://pharmacy-backend-poc.onrender.com';
 
 export const BillingProvider = ({ children }) => {
   const [medicines, setMedicines] = useState([]);
