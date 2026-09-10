@@ -7,6 +7,7 @@ import EditEmployee from '../pages/EditEmployee';
 import NotFound from '../pages/NotFound';
 import ProtectedRoute from '../components/ProtectedRoute';
 import CreateInvoice from '../pages/CreateInvoice';
+import ClubLedger from '../components/ClubLedger';
 
 export default function AppRoutes() {
   return (
@@ -53,6 +54,18 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Make sure this route is added before path="*" */}
+      <Route
+        path="/club-ledger"
+        element={
+          <ProtectedRoute>
+            <ClubLedger />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch-all route must be at the very end */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
