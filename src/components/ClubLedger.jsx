@@ -1,35 +1,51 @@
 import React, { useState } from 'react';
 
 const ClubLedger = () => {
-    const [selectedMonth, setSelectedMonth] = useState('Sep-26');
-    const [newMonthInput, setNewMonthInput] = useState('');
-
-    // Dynamic store holding data for all months
+    // Initial state with pre-populated Sep-26 data
     const [monthlyData, setMonthlyData] = useState({
         'Sep-26': {
             carryForward: 1433,
-            collections: [],
-            expenditures: []
+            collections: [
+                { id: 1, name: 'Kamdev Sahoo', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 2, name: 'Himanshu Gaur', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 3, name: 'Mahesh', amount: 1000, receivedBy: 'Sahoo' },
+                { id: 4, name: 'Ankit Gupta', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 5, name: 'Kundan', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 6, name: 'Abhishek Sen', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 7, name: 'Mohanty', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 8, name: 'Ambuj', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 9, name: 'Anup', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 10, name: 'Amod Giri', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 11, name: 'Vivek', amount: 1500, receivedBy: 'Sahoo' },
+                { id: 12, name: 'Madan', amount: 1500, receivedBy: '-' }
+            ],
+            expenditures: [
+                { id: 1, description: '1 Court charge', amount: 9000 },
+                { id: 2, description: '2nd court charge', amount: 8000 }
+            ]
         }
     });
 
-    // Form inputs state
+    const [selectedMonth, setSelectedMonth] = useState('Sep-26');
+    const [newMonthInput, setNewMonthInput] = useState('');
+
+    // Input form states
     const [memberInput, setMemberInput] = useState({ name: '', amount: '', receivedBy: '' });
     const [expenseInput, setExpenseInput] = useState({ description: '', amount: '' });
 
-    // Retrieve active month data dynamically
+    // Active month data lookup
     const activeData = monthlyData[selectedMonth] || { carryForward: 0, collections: [], expenditures: [] };
     const carryForward = activeData.carryForward || 0;
     const collections = activeData.collections || [];
     const expenditures = activeData.expenditures || [];
 
-    // Totals calculated directly from active month's state
+    // Calculated totals for active month
     const totalCollections = collections.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const totalExpenditures = expenditures.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const finalBalance = (Number(carryForward) + totalCollections) - totalExpenditures;
 
-    // Helper to update active month's data in the state object
-    const updateActiveMonthData = (updatedFields) => {
+    // Helper to update active month without affecting other months
+    const updateActiveMonth = (updatedFields) => {
         setMonthlyData(prev => ({
             ...prev,
             [selectedMonth]: {
@@ -39,7 +55,7 @@ const ClubLedger = () => {
         }));
     };
 
-    // 1. Add Month manually
+    // Add manual month
     const handleAddMonth = () => {
         const monthToAdd = newMonthInput.trim();
         if (!monthToAdd) return alert('Enter a month name (e.g. Oct-26)');
@@ -53,12 +69,12 @@ const ClubLedger = () => {
         setNewMonthInput('');
     };
 
-    // 2. Change Carry Forward for active month
+    // Handle carry forward input change
     const handleCarryForwardChange = (val) => {
-        updateActiveMonthData({ carryForward: Number(val) });
+        updateActiveMonth({ carryForward: Number(val) });
     };
 
-    // 3. Add Collection record to active month
+    // Add new collection record
     const handleAddCollection = (e) => {
         e.preventDefault();
         if (!memberInput.name || !memberInput.amount) return;
@@ -70,11 +86,11 @@ const ClubLedger = () => {
             receivedBy: memberInput.receivedBy || '-'
         };
 
-        updateActiveMonthData({ collections: [...collections, newRecord] });
+        updateActiveMonth({ collections: [...collections, newRecord] });
         setMemberInput({ name: '', amount: '', receivedBy: '' });
     };
 
-    // 4. Add Expenditure record to active month
+    // Add new expenditure record
     const handleAddExpense = (e) => {
         e.preventDefault();
         if (!expenseInput.description || !expenseInput.amount) return;
@@ -85,11 +101,11 @@ const ClubLedger = () => {
             amount: Number(expenseInput.amount)
         };
 
-        updateActiveMonthData({ expenditures: [...expenditures, newRecord] });
+        updateActiveMonth({ expenditures: [...expenditures, newRecord] });
         setExpenseInput({ description: '', amount: '' });
     };
 
-    // 5. Close month and transfer balance to Next Month
+    // Transition month logic: Keep current month untouched, create new month with carryForward = finalBalance
     const handleTransitionMonth = () => {
         const confirmMsg = `Close ${selectedMonth} and transition net balance ₹${finalBalance} to the next month?`;
         if (!window.confirm(confirmMsg)) return;
@@ -98,23 +114,22 @@ const ClubLedger = () => {
         if (!nextMonthLabel) return;
 
         setMonthlyData(prev => ({
-            ...prev,
-            // Next month starts with calculated net balance as Carry Forward and empty collections/expenses
+            ...prev, // Preserves Sep-26 exactly as it is!
             [nextMonthLabel]: {
-                carryForward: finalBalance,
-                collections: [],
-                expenditures: []
+                carryForward: finalBalance, // Sets carry forward to net balance
+                collections: [],            // Fresh empty list for new month
+                expenditures: []           // Fresh empty list for new month
             }
         }));
 
-        setSelectedMonth(nextMonthLabel);
+        setSelectedMonth(nextMonthLabel); // Switches view to Oct-26
     };
 
     return (
         <div style={{ maxWidth: '1050px', margin: '30px auto', fontFamily: 'sans-serif' }}>
             <div style={{ border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', backgroundColor: '#fff' }}>
                 
-                {/* Dynamic Title */}
+                {/* Dark Header */}
                 <div style={{ backgroundColor: '#102A45', color: '#fff', textAlign: 'center', padding: '12px', fontSize: '18px', fontWeight: 'bold' }}>
                     {selectedMonth} — Shuttlers Club Collection & Expenditure Summary
                 </div>
@@ -161,7 +176,7 @@ const ClubLedger = () => {
                         </div>
                     </div>
 
-                    {/* Input Forms */}
+                    {/* Entry Forms */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '25px' }}>
                         <div>
                             <h4 style={{ color: '#102A45', marginBottom: '8px', marginTop: 0 }}>Add New Collection Record</h4>
@@ -187,8 +202,9 @@ const ClubLedger = () => {
                         </div>
                     </div>
 
-                    {/* Data Tables */}
+                    {/* Tables */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px', borderTop: '1px solid #eee', paddingTop: '15px' }}>
+                        {/* Collections Table */}
                         <div>
                             <h4 style={{ marginTop: 0 }}>Collections</h4>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -217,6 +233,7 @@ const ClubLedger = () => {
                             </table>
                         </div>
 
+                        {/* Expenditures Table */}
                         <div>
                             <h4 style={{ marginTop: 0 }}>Expenditures</h4>
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -246,7 +263,7 @@ const ClubLedger = () => {
                         </div>
                     </div>
 
-                    {/* Total Bar */}
+                    {/* Footer Totals Bar */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '25px', paddingTop: '15px', borderTop: '2px solid #102A45' }}>
                         <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
                             Total Collections: <span style={{ color: 'green' }}>₹{totalCollections}</span>
