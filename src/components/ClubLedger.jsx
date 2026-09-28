@@ -65,9 +65,9 @@ const ClubLedger = () => {
         }
     };
 
-    // Prompt user for authentication password before making save requests
+    // Prompt user for authentication password without revealing format
     const promptPasswordAndSave = async (ledgerPayload) => {
-        const password = prompt("Enter admin authorization password (Format: ddmmyy+day e.g., 280926mon):");
+        const password = prompt("Enter admin authorization password:");
         if (!password) return false;
 
         setSaving(true);
