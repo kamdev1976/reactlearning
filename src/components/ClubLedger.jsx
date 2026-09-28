@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Production API URL on Render
 const API_URL = 'https://pharmacy-backend-poc.onrender.com';
 
 const INITIAL_LEDGER = {
@@ -21,13 +20,9 @@ const ClubLedger = () => {
     const [newMemberName, setNewMemberName] = useState('');
     const [expenseInput, setExpenseInput] = useState({ description: '', amount: '' });
 
-    // Dynamic Financial Calculations
-    const totalCollections = (activeLedger.collections || []).reduce(
-        (sum, item) => sum + Number(item.amount || 0), 0
-    );
-    const totalExpenses = (activeLedger.expenses || []).reduce(
-        (sum, item) => sum + Number(item.amount || 0), 0
-    );
+    // Dynamic Totals
+    const totalCollections = (activeLedger.collections || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalExpenses = (activeLedger.expenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const closingBalance = (Number(activeLedger.carryForward || 0) + totalCollections) - totalExpenses;
 
     useEffect(() => {
@@ -48,9 +43,6 @@ const ClubLedger = () => {
                 if (Array.isArray(months) && months.length > 0) {
                     setAvailableMonths(months);
                     setSelectedMonth(months[0]);
-                } else {
-                    await saveLedgerToBackend(INITIAL_LEDGER);
-                    setAvailableMonths(['Sep-26']);
                 }
             }
         } catch (err) {
@@ -73,19 +65,32 @@ const ClubLedger = () => {
         }
     };
 
-    const saveLedgerToBackend = async (ledgerPayload) => {
+    // Prompt user for authentication password before making save requests
+    const promptPasswordAndSave = async (ledgerPayload) => {
+        const password = prompt("Enter admin authorization password (Format: ddmmyy+day e.g., 280926mon):");
+        if (!password) return false;
+
         setSaving(true);
         try {
             const res = await fetch(`${API_URL}/ledger`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-admin-password': password.trim()
+                },
                 body: JSON.stringify(ledgerPayload)
             });
             
+            if (res.status === 401) {
+                alert('Invalid password! Changes were NOT saved.');
+                return false;
+            }
+
             if (res.ok) {
                 const savedData = await res.json();
                 setActiveLedger(savedData);
-                alert(`Successfully saved ${ledgerPayload.monthKey} to db.json!`);
+                alert(`Successfully authenticated & saved ${ledgerPayload.monthKey}!`);
+                return true;
             } else {
                 alert('Server returned an error while saving.');
             }
@@ -95,10 +100,11 @@ const ClubLedger = () => {
         } finally {
             setSaving(false);
         }
+        return false;
     };
 
     const handleSaveClick = () => {
-        saveLedgerToBackend(activeLedger);
+        promptPasswordAndSave(activeLedger);
     };
 
     const handleCarryForwardChange = (val) => {
@@ -134,7 +140,7 @@ const ClubLedger = () => {
     };
 
     const handleDeleteMember = (id, name) => {
-        if (!window.confirm(`Remove "${name}" from this month's ledger?`)) return;
+        if (!window.confirm(`Remove "${name}"?`)) return;
         setActiveLedger(prev => ({
             ...prev,
             collections: (prev.collections || []).filter(item => item.id !== id)
@@ -172,9 +178,6 @@ const ClubLedger = () => {
 
         const cleanMonthKey = nextMonthKey.trim();
 
-        // Persist active month first
-        await saveLedgerToBackend(activeLedger);
-
         const resetCollections = (activeLedger.collections || []).map((item, idx) => ({
             id: idx + 1,
             memberName: item.memberName,
@@ -189,17 +192,10 @@ const ClubLedger = () => {
             expenses: []
         };
 
-        const res = await fetch(`${API_URL}/ledger`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newMonthLedger)
-        });
-
-        if (res.ok) {
+        const success = await promptPasswordAndSave(newMonthLedger);
+        if (success) {
             setAvailableMonths(prev => [...new Set([...prev, cleanMonthKey])]);
             setSelectedMonth(cleanMonthKey);
-            setActiveLedger(newMonthLedger);
-            alert(`Created month ${cleanMonthKey} with carry forward balance of ₹${closingBalance}!`);
         }
     };
 
@@ -207,7 +203,7 @@ const ClubLedger = () => {
         <div style={{ maxWidth: '1050px', margin: '30px auto', fontFamily: 'Arial, sans-serif' }}>
             <div style={{ border: '1px solid #ccc', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                 
-                {/* Top Header Bar */}
+                {/* Header */}
                 <div style={{ backgroundColor: '#102A45', color: '#fff', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ fontSize: '20px', fontWeight: 'bold' }}>
                         {selectedMonth} — Shuttlers Club Ledger
@@ -217,13 +213,12 @@ const ClubLedger = () => {
                         disabled={saving}
                         style={{ backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '8px 18px', borderRadius: '4px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' }}
                     >
-                        {saving ? 'Saving...' : '💾 Save All Changes'}
+                        {saving ? 'Validating...' : '🔒 Authenticate & Save'}
                     </button>
                 </div>
 
                 <div style={{ padding: '20px' }}>
-                    
-                    {/* Month Selection Bar */}
+                    {/* Controls */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '15px', flexWrap: 'wrap', backgroundColor: '#f8f9fa', padding: '12px', borderRadius: '4px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <label style={{ fontWeight: 'bold' }}>Active Month:</label>
@@ -300,13 +295,11 @@ const ClubLedger = () => {
                         </div>
                     </div>
 
-                    {/* Content Tables */}
+                    {/* Tables */}
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Loading Month Ledger Data...</div>
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Loading Ledger Data...</div>
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px', borderTop: '2px solid #eee', paddingTop: '15px' }}>
-                            
-                            {/* Collections Table */}
                             <div>
                                 <h4 style={{ marginTop: 0, color: '#28a745' }}>Collections</h4>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -321,7 +314,7 @@ const ClubLedger = () => {
                                     </thead>
                                     <tbody>
                                         {(!activeLedger.collections || activeLedger.collections.length === 0) ? (
-                                            <tr><td colSpan="5" style={{ padding: '15px', textAlign: 'center', color: '#888' }}>No collection entries found</td></tr>
+                                            <tr><td colSpan="5" style={{ padding: '15px', textAlign: 'center', color: '#888' }}>No entries found</td></tr>
                                         ) : (
                                             activeLedger.collections.map((item, index) => (
                                                 <tr key={item.id || index} style={{ borderBottom: '1px solid #eee' }}>
@@ -360,7 +353,6 @@ const ClubLedger = () => {
                                 </table>
                             </div>
 
-                            {/* Expenses Table */}
                             <div>
                                 <h4 style={{ marginTop: 0, color: '#dc3545' }}>Expenses</h4>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
@@ -401,7 +393,7 @@ const ClubLedger = () => {
                         </div>
                     )}
 
-                    {/* Bottom Totals Summary */}
+                    {/* Footer Totals */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '25px', paddingTop: '15px', borderTop: '2px solid #102A45' }}>
                         <div style={{ fontSize: '16px', fontWeight: 'bold' }}>
                             Total Collections: <span style={{ color: 'green' }}>₹{totalCollections}</span> | Total Expenses: <span style={{ color: '#dc3545' }}>₹{totalExpenses}</span>
